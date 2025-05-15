@@ -1,5 +1,14 @@
 {
+  "name": "qr-code-backend",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js"
+  },
   "dependencies": {
+    "@bnb-chain/reed-solomon": "^1.1.4",
+    "@ronomon/reed-solomon": "^6.0.0",
     "cors": "^2.8.5",
     "express": "^5.1.0"
   }
