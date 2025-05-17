@@ -15,7 +15,7 @@ function encodeByteMode(input) {
   let fullBitStream = modeIndicator + charCountIndicator + dataBits;
 
   // Add terminator (up to 4 bits, without exceeding max bit length)
-  const maxBits = 208;
+  const maxBits = 272;
   const remainingBits = maxBits - fullBitStream.length;
   fullBitStream += '0'.repeat(Math.min(4, remainingBits));
 

@@ -1,35 +1,37 @@
 
-// import express from 'express';
-// import { getQRCode } from '../main.js';
-// import cors from 'cors';
-
-// const app = express();
-// app.use(express.json());
-// app.use(cors());
-
-// app.post('/generate-qr', (req, res) => {
-//     const { content, errorLevel } = req.body;
-//     console.log('Received content:', content);
-//     const formattedContent = content.startsWith('http') ? content : `https://${content}`;
-//     console.log('Encoded Content:', formattedContent);
-//     const qrCodeData = getQRCode(formattedContent, errorLevel || 'L');
-//     qrCodeData.qrCode = qrCodeData.qrCode.map(row => Array.from(row)); // Convert Uint8Array to array
-//     res.json(qrCodeData);
-//   console.log(qrCodeData.qrCode);
-// });
-
-// app.listen(5000, () => console.log('Server running on http://localhost:5000'));
-
-
 const { encodeByteMode } = require('./encoder/byteEncoder');
-const { bitStreamToCodewords, generateECC } = require('./encoder/errorCorrection');
+const { bitStreamToCodewords, generateECC, interleaveCodewords } = require('./encoder/errorCorrection');
+const { chooseBestMask } = require('./qr_matrix/masking');
+const { codewordsToBits, initializeMatrix, placeDataBits } = require('./qr_matrix/matrix');
 
 const input = 'https://example.com';
 const bitStream = encodeByteMode(input);
 const dataCodewords = bitStreamToCodewords(bitStream);
-(async () => {
-  const ecc = await generateECC(dataCodewords);
-  console.log('ECC Codewords:', ecc);
-})();
+
+console.log('Data Codewords Length:', dataCodewords.length);
+
+// Determine ECC length based on QR version and error correction level
+const eccLength = 43; // Example value for Version 3, Level q
+
+const ecc = generateECC(dataCodewords, eccLength);
 
 console.log('Data Codewords:', dataCodewords);
+console.log('ECC Codewords:', ecc);
+
+const finalCodewords = interleaveCodewords(dataCodewords, ecc);
+console.log('Final Codewords for QR Matrix:', finalCodewords);
+ 
+
+// Generate full matrix
+const dataBits = codewordsToBits(finalCodewords);
+const matrix = initializeMatrix();
+const finalMatrix = placeDataBits(matrix, dataBits);
+
+console.log('Final QR Matrix:');
+console.table(finalMatrix);
+
+
+ const { bestMask, maskedMatrix } = chooseBestMask(finalMatrix);
+ console.log("Masked matrix");
+ console.log("bestMask" , bestMask);
+ console.log("masked matrix " , maskedMatrix);
