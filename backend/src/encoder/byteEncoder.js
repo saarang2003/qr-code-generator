@@ -31,6 +31,8 @@ function encodeByteMode(input) {
     i++;
   }
 
+  console.log('Bit stream length:', fullBitStream.length); // Should be 272
+
   return fullBitStream;
 }
 
