@@ -1,6 +1,3 @@
-// masking.js
-
-// 8 QR code mask patterns
 const maskFunctions = [
   (r, c) => (r + c) % 2 === 0,
   (r, c) => r % 2 === 0,
@@ -12,29 +9,31 @@ const maskFunctions = [
   (r, c) => (((r + c) % 2 + (r * c) % 3) % 2) === 0
 ];
 
-
-function isReserved(matrix, row, col) {
+function isReservedForMasking(matrix, row, col) {
   const size = matrix.length;
-
-  // For example, let's assume reserved cells are the corners and timing patterns
-  if ((row < 7 && col < 7) || (row < 7 && col >= size - 7) || (row >= size - 7 && col < 7)) {
-    return true; // It's a reserved cell
-  }
-
+  if (
+    (row < 7 && col < 7) ||
+    (row < 7 && col >= size - 7) ||
+    (row >= size - 7 && col < 7) ||
+    (row >= 20 && row <= 24 && col >= 20 && col <= 24) ||
+    (row === 6 || col === 6) ||
+    (row === 8 && col <= 8) ||
+    (col === 8 && row <= 8) ||
+    (row === 8 && col >= size - 8) ||
+    (col === 8 && row >= size - 8) ||
+    (row === size - 8 && col === 8)
+  ) return true;
   return false;
 }
 
-
-// Apply a mask function to a deep copy of matrix
 function applyMask(matrix, maskFunc) {
   const size = matrix.length;
   const masked = matrix.map(row => row.slice());
-
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
-      if (!isReserved(masked, r, c)) {
+      if (!isReservedForMasking(masked, r, c)) {
         if (maskFunc(r, c)) {
-          masked[r][c] ^= 1; // invert bit
+          masked[r][c] ^= 1;
         }
       }
     }
@@ -42,12 +41,9 @@ function applyMask(matrix, maskFunc) {
   return masked;
 }
 
-// Penalty rule: Count same color in a row or column
 function calculatePenalty(matrix) {
   const size = matrix.length;
   let penalty = 0;
-
-  // Rows
   for (let r = 0; r < size; r++) {
     let count = 1;
     for (let c = 1; c < size; c++) {
@@ -60,8 +56,6 @@ function calculatePenalty(matrix) {
       }
     }
   }
-
-  // Columns
   for (let c = 0; c < size; c++) {
     let count = 1;
     for (let r = 1; r < size; r++) {
@@ -74,16 +68,25 @@ function calculatePenalty(matrix) {
       }
     }
   }
-
   return penalty;
 }
 
-// Try all masks and choose best
+function addQuietZone(matrix) {
+  const quietZoneSize = 4;
+  const sizeWithQuietZone = matrix.length + quietZoneSize * 2;
+  const newMatrix = Array(sizeWithQuietZone).fill().map(() => Array(sizeWithQuietZone).fill(0));
+  for (let row = 0; row < matrix.length; row++) {
+    for (let col = 0; col < matrix[row].length; col++) {
+      newMatrix[row + quietZoneSize][col + quietZoneSize] = matrix[row][col];
+    }
+  }
+  return newMatrix;
+}
+
 function chooseBestMask(matrix) {
   let minPenalty = Infinity;
   let bestMask = 0;
   let bestMatrix = null;
-
   for (let i = 0; i < 8; i++) {
     const masked = applyMask(matrix, maskFunctions[i]);
     const score = calculatePenalty(masked);
@@ -93,14 +96,13 @@ function chooseBestMask(matrix) {
       bestMatrix = masked;
     }
   }
-
   return { bestMask, maskedMatrix: bestMatrix };
 }
 
-// Exporting the functions so that they can be used in other files
 module.exports = {
   maskFunctions,
   applyMask,
   calculatePenalty,
-  chooseBestMask
+  chooseBestMask,
+  addQuietZone
 };

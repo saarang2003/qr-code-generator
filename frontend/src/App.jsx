@@ -4,18 +4,28 @@ import QRCodeCanvas from './QRcanvas.jsx';
 const App = () => {
   const [input, setInput] = useState('');
   const [qrCodeMatrix, setQrCodeMatrix] = useState(null);
+  const [error, setError] = useState('');
 
   const handleGenerate = async () => {
+    if (!input) {
+      setError('Please enter a URL');
+      return;
+    }
+    setError('');
     try {
       const response = await fetch('http://localhost:5000/generate-qr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: input, errorLevel: 'L' }),
+        body: JSON.stringify({ content: input, errorLevel: 'Q' }),
       });
+      if (!response.ok) {
+        throw new Error('Failed to generate QR code');
+      }
       const qrCodeData = await response.json();
       setQrCodeMatrix(qrCodeData.qrCode);
     } catch (error) {
       console.error('Error generating QR code:', error);
+      setError('Failed to generate QR code. Please try again.');
     }
   };
 
@@ -26,10 +36,11 @@ const App = () => {
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="Enter text or URL"
+        placeholder="Enter URL (e.g., https://example.com)"
       />
       <button onClick={handleGenerate}>Generate QR Code</button>
-      {qrCodeMatrix && <QRCodeCanvas qrCodeMatrix={qrCodeMatrix} />}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {qrCodeMatrix && <QRCodeCanvas qrCodeMatrix={qrCodeMatrix} url={input} />}
     </div>
   );
 };
