@@ -9,7 +9,8 @@ const QRCodeCanvas = ({ qrCodeMatrix, url }) => {
       return;
     }
 
-    console.log('Matrix size:', qrCodeMatrix.length, qrCodeMatrix[0].length);
+    console.log('Matrix size:', qrCodeMatrix.length, qrCodeMatrix[0].length); // Should be 37x37
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const size = qrCodeMatrix.length;
