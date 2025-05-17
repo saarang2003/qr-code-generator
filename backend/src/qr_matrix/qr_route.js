@@ -18,11 +18,15 @@ router.post('/', (req, res) => {
     const eccLength = 43; // Version 3, Level Q
     const ecc = generateECC(dataCodewords, eccLength);
     const finalCodewords = interleaveCodewords(dataCodewords, ecc);
-    
     const dataBits = codewordsToBits(finalCodewords);
-    let matrix = initializeMatrix();
+    // First initialize with mask 0, then re-initialize with the best mask
+    let matrix = initializeMatrix(0);
     matrix = placeDataBits(matrix, dataBits);
-    const { maskedMatrix } = chooseBestMask(matrix);
+    const { bestMask, maskedMatrix } = chooseBestMask(matrix);
+    // Re-initialize matrix with the correct mask pattern
+    matrix = initializeMatrix(bestMask);
+    matrix = placeDataBits(matrix, dataBits);
+    // Apply the chosen mask
     const finalMatrix = addQuietZone(maskedMatrix);
     res.json({ qrCode: finalMatrix });
   } catch (error) {
