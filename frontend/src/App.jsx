@@ -42,26 +42,33 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <header><h1>QR Code Generator</h1></header>
-      <main>
-        <textarea
-          placeholder="Enter text here to generate QR code"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-        />
-        <input type="text" value={darkColor} onChange={(e) => setDarkColor(e.target.value)} />
-        <input type="text" value={lightColor} onChange={(e) => setLightColor(e.target.value)} />
+<div className="App">
+  <header><h1>QR Code Generator</h1></header>
+  <main>
+    <div className="left-panel">
+      <textarea
+        placeholder="Enter text here to generate QR code"
+        value={inputText}
+        onChange={(e) => setInputText(e.target.value)}
+      />
+      <div className="options">
+        <input type="text" placeholder="Dark Color" value={darkColor} onChange={(e) => setDarkColor(e.target.value)} />
+        <input type="text" placeholder="Light Color" value={lightColor} onChange={(e) => setLightColor(e.target.value)} />
         <select value={errorCorrectionLevel} onChange={(e) => setErrorCorrectionLevel(e.target.value)}>
           <option value="L">L</option><option value="M">M</option><option value="Q">Q</option><option value="H">H</option>
         </select>
-        <input type="number" value={margin} onChange={(e) => setMargin(e.target.value)} />
-        <button onClick={generateQr}>Generate QR Code</button>
-
-        {error && <p>{error}</p>}
-        {qrcode && <img src={qrcode} alt="QR Code" />}
-      </main>
+        <input type="number" placeholder="Margin" value={margin} onChange={(e) => setMargin(e.target.value)} />
+      </div>
+      <button onClick={generateQr}>Generate QR Code</button>
+      {error && <p className="error-message">{error}</p>}
     </div>
+
+    <div className="qr-display">
+      {qrcode && <img src={qrcode} alt="QR Code" />}
+    </div>
+  </main>
+</div>
+
   );
 }
 
